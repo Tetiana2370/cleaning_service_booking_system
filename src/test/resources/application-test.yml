@@ -1,0 +1,7 @@
+app:
+  datasource:
+    jdbc-url: jdbc:postgresql://127.0.0.1:5433/csms_test
+    username: csms
+    password: 'qwe123'
+    pool-size: 30
+    clean-disabled: false
