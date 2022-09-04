@@ -1,75 +1,40 @@
 package com.csms.server.security;
 
-import com.csms.server.service.AppUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @EnableWebSecurity
-public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
-    private final PasswordEncoder passwordEncoder;
-    private final AppUserService appUserService;
-
+public class ApplicationSecurityConfig
+        extends WebSecurityConfigurerAdapter
+{
     @Autowired
-    public ApplicationSecurityConfig(PasswordEncoder passwordEncoder, AppUserService appUserService){
-        this.passwordEncoder = passwordEncoder;
-        this.appUserService = appUserService;
-    }
+    AuthProvider authProvider;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    protected void configure(HttpSecurity http) throws Exception
+    {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "index", "/css/*", "/js/*")
+                .antMatchers("/", "/index", "/register")
                 .permitAll()
                 //.antMatchers("/com/csms/server/api/**").hasRole(ApplicationUserRole.ADMIN.name())
-                .anyRequest()
-                .authenticated()
+                .anyRequest().authenticated()
                 .and()
-                .formLogin()
-                .defaultSuccessUrl("/customerOrders");
+                .formLogin().defaultSuccessUrl("/customerOrders")
+                .and()
+                .logout().invalidateHttpSession(true)
+                .clearAuthentication(true).permitAll();
     }
 
-/*    @Override
-    @Bean
-    protected UserDetailsService userDetailsService(){
-        UserDetails admin = User.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("password"))
-                .roles(ApplicationUserRole.ADMIN.name())
-                .build();
-        UserDetails customer = User.builder()
-                .username("customer")
-                .password(passwordEncoder.encode("password"))
-                .roles(ApplicationUserRole.CUSTOMER.name())
-                .build();
-        UserDetails adminTrainee = User.builder()
-                .username("adminTrainee")
-                .password(passwordEncoder.encode("password"))
-                .roles(ApplicationUserRole.ADMIN_TRAINEE.name())
-                .build();
-        return new InMemoryUserDetailsManager(admin, customer, adminTrainee);
-    }
-*/
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(daoAuthenticationProvider());
+    protected void configure(AuthenticationManagerBuilder auth)
+    {
+        auth.authenticationProvider(authProvider);
     }
-
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider(){
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(appUserService);
-        return provider;
-    }
-
 }

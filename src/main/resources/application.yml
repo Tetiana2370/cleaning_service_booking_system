@@ -1,6 +1,6 @@
 app:
   datasource:
-    jdbc-url: jdbc:postgresql://127.0.0.1:5433/csms
+    jdbc-url: jdbc:postgresql://127.0.0.1:5432/csms
     username: csms
     password: 'qwe123'
     pool-size: 30

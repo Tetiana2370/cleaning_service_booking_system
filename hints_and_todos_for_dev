@@ -1,0 +1,10 @@
+Authentication tutorials: 
+https://www.tutorialspoint.com/spring_security/spring_security_form_login_with_database.htm
+https://www.baeldung.com/spring-security-authentication-provider
+
+Thymeleaf tutorials:
+https://attacomsian.com/blog/spring-boot-thymeleaf-form-handling
+
+TODO: add validation for username (if is not already used)
+TODO: add validation + error messages fields to register.html
+TODO: work on ApplicationUserRole & GrantedAuthorities

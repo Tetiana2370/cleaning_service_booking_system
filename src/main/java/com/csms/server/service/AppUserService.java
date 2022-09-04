@@ -5,7 +5,6 @@ import com.csms.server.dto.AppUserDto;
 import com.csms.server.exception.ObjectDoesNotExistException;
 import com.csms.server.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -55,30 +54,14 @@ public class AppUserService implements UserDetailsService {
     public void delete(long idAppUser) throws ObjectDoesNotExistException {
         appUserDao.delete(idAppUser);
     }
-
-   /* @Override
+    
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDetails userDetails =  appUserDao.getByUsername(username);
-        if(userDetails != null){
-            return userDetails;
+        AppUserDto appUserDto = appUserDao.getByUsername(username);
+        if(appUserDto != null) {
+            return appUserDto;
         } else {
             throw new UsernameNotFoundException(String.format("Username %s not found", username));
         }
-    }*/
-
-    public List<AppUserDto> temporaryGetAppUserList(){
-        List<AppUserDto> appUserDtoList = List.of(
-                new AppUserDto(1L, "Tetina", "Kravchuk", "555000", "t.k@gmail.com", "admin", passwordEncoder.encode("password"))
-        );
-        return appUserDtoList;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return temporaryGetAppUserList()
-                .stream()
-                .filter(appUserDto -> username.equals(appUserDto.getUsername()))
-                .findFirst()
-                .orElseThrow();//throw new UsernameNotFoundException(String.format("Username %s not found", username)));
     }
 }

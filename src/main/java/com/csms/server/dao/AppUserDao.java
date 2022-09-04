@@ -2,24 +2,23 @@ package com.csms.server.dao;
 
 import com.csms.server.dto.AppUserDto;
 import com.csms.server.exception.ObjectDoesNotExistException;
-import com.csms.server.security.ApplicationSecurityConfig;
 import com.csms.server.security.PasswordConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.Type;
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class AppUserDao {
-
+public class AppUserDao
+{
     public static final String ID_APP_USER = "idAppUser";
     public static final String ID_APP_USER_ROLE = "idAppUserRole";
     public static final String USERNAME = "username";
@@ -35,12 +34,14 @@ public class AppUserDao {
     private final PasswordConfig passwordConfig;
 
     @Autowired
-    public AppUserDao(NamedParameterJdbcTemplate jdbcTemplate, PasswordConfig passwordConfig){
+    public AppUserDao(NamedParameterJdbcTemplate jdbcTemplate, PasswordConfig passwordConfig)
+    {
         this.jdbcTemplate = jdbcTemplate;
         this.passwordConfig = passwordConfig;
     }
 
-    public long insert(AppUserDto appUserDto) {
+    public long insert(AppUserDto appUserDto)
+    {
         String sql = "insert into app_user (" +
                 "id_app_user_role, " +
                 "username, " +
@@ -66,7 +67,7 @@ public class AppUserDao {
                 .addValue(FIRST_NAME, appUserDto.firstName, Types.VARCHAR)
                 .addValue(USERNAME, appUserDto.username, Types.VARCHAR)
                 .addValue(PASSWORD, passwordConfig.passwordEncoder().encode(appUserDto.getPassword()), Types.VARCHAR)
-                .addValue(LAST_NAME,  appUserDto.lastName, Types.VARCHAR)
+                .addValue(LAST_NAME, appUserDto.lastName, Types.VARCHAR)
                 .addValue(PHONE_NUMBER, appUserDto.phoneNumber, Types.VARCHAR)
                 .addValue(EMAIL_ADDRESS, appUserDto.emailAddress, Types.VARCHAR)
                 .addValue(ACTIVE, appUserDto.active ? 1 : 0, Types.INTEGER);
@@ -77,53 +78,60 @@ public class AppUserDao {
         return Objects.requireNonNull(holder.getKey()).longValue();
     }
 
-    public AppUserDto get(long idAppUser) throws ObjectDoesNotExistException {
+    public AppUserDto get(long idAppUser) throws ObjectDoesNotExistException
+    {
         validateIfExists(idAppUser);
         String sql = "select * from app_user where id_app_user = :idAppUser ";
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue(ID_APP_USER,  idAppUser, Types.NUMERIC);
+                .addValue(ID_APP_USER, idAppUser, Types.NUMERIC);
 
         return jdbcTemplate.queryForObject(sql, parameters, this::mapRow);
     }
 
-    public AppUserDto getByUsername(String username) {
+    public AppUserDto getByUsername(String username)
+    {
         String sql = "select * from app_user where username = :username ";
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue(USERNAME,  username, Types.VARCHAR);
+                .addValue(USERNAME, username, Types.VARCHAR);
 
         return jdbcTemplate.queryForObject(sql, parameters, this::mapRow);
     }
 
-    public List<AppUserDto> getAll(){
+    public List<AppUserDto> getAll()
+    {
         String sql = "select * from app_user";
 
         return jdbcTemplate.query(sql, this::mapRow);
     }
 
-    public List<AppUserDto> getAll(boolean active){
+    public List<AppUserDto> getAll(boolean active)
+    {
         String sql = "select * from app_user where active = :active";
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue(ACTIVE,  active ? 1 : 0, Types.NUMERIC);
+                .addValue(ACTIVE, active ? 1 : 0, Types.NUMERIC);
 
-        return jdbcTemplate.query(sql, parameters,  this::mapRow);
+        return jdbcTemplate.query(sql, parameters, this::mapRow);
     }
 
-    public void delete(long idAppUser) throws ObjectDoesNotExistException {
+    public void delete(long idAppUser) throws ObjectDoesNotExistException
+    {
         validateIfExists(idAppUser);
         String sql = "delete from app_user where id_app_user = :idAppUser";
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue(ID_APP_USER,  idAppUser, Types.NUMERIC);
+                .addValue(ID_APP_USER, idAppUser, Types.NUMERIC);
 
         jdbcTemplate.update(sql, parameters);
     }
 
-    public void deleteAll(){
+    public void deleteAll()
+    {
         String sql = "delete from app_user";
         MapSqlParameterSource parameters = new MapSqlParameterSource();
         jdbcTemplate.update(sql, parameters);
     }
 
-    public void update(AppUserDto appUserDto) throws ObjectDoesNotExistException {
+    public void update(AppUserDto appUserDto) throws ObjectDoesNotExistException
+    {
         validateIfExists(appUserDto.idAppUser);
         String sql = "update app_user set " +
                 "id_app_user_role = :idAppUserRole, " +
@@ -136,10 +144,10 @@ public class AppUserDao {
                 "where id_app_user = :idAppUser ";
 
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue(ID_APP_USER,  appUserDto.idAppUser, Types.NUMERIC)
+                .addValue(ID_APP_USER, appUserDto.idAppUser, Types.NUMERIC)
                 .addValue(ID_APP_USER_ROLE, appUserDto.idAppUserRole, Types.NUMERIC)
                 .addValue(FIRST_NAME, appUserDto.firstName, Types.VARCHAR)
-                .addValue(LAST_NAME,  appUserDto.lastName, Types.VARCHAR)
+                .addValue(LAST_NAME, appUserDto.lastName, Types.VARCHAR)
                 .addValue(PHONE_NUMBER, appUserDto.phoneNumber, Types.VARCHAR)
                 .addValue(EMAIL_ADDRESS, appUserDto.emailAddress, Types.VARCHAR)
                 .addValue(ACTIVE, appUserDto.active ? 1 : 0, Types.INTEGER);
@@ -147,7 +155,8 @@ public class AppUserDao {
         jdbcTemplate.update(sql, parameters);
     }
 
-    public AppUserDto mapRow(ResultSet rs, int rowNum) throws SQLException {
+    public AppUserDto mapRow(ResultSet rs, int rowNum) throws SQLException
+    {
 
         AppUserDto appUserDto = new AppUserDto();
         appUserDto.idAppUser = rs.getLong("id_app_user");
@@ -159,11 +168,14 @@ public class AppUserDao {
         appUserDto.lastName = rs.getString("last_name");
         appUserDto.phoneNumber = rs.getString("phone_number");
         appUserDto.emailAddress = rs.getString("email_address");
+        appUserDto.password = rs.getString("password");
+        appUserDto.failedLoginAttempts = rs.getInt("failed_login_attempts");
 
         return appUserDto;
     }
 
-    public void validateIfExists(long idAppUser) throws ObjectDoesNotExistException {
+    public void validateIfExists(long idAppUser) throws ObjectDoesNotExistException
+    {
         String sql = "select count(*) from app_user where id_app_user = :idAppUser ";
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue(ID_APP_USER, idAppUser, Types.NUMERIC);

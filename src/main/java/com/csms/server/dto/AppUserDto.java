@@ -3,16 +3,23 @@ package com.csms.server.dto;
 
 import com.csms.server.security.ApplicationUserRole;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.text.DateFormat;
 import java.util.Collection;
-import java.util.List;
+import java.util.Date;
 import java.util.Set;
 
+@Data
+// this is not the best solution:
+// Lombok generates getters,setters etc at the compile time
+// That's why we can't get rid of direct implementation of UserDetails methods.
+// But we need those methods to process forms (e.g. register.html).
 public class AppUserDto implements UserDetails {
 
     public Long idAppUser;
@@ -31,12 +38,15 @@ public class AppUserDto implements UserDetails {
     @Email
     public String emailAddress;
     @NotNull
+    public int failedLoginAttempts;
+    public Date lastSucceedLogin;
+    @NotNull
     public boolean active;
     @NotNull
     public int version;
 
     private Set<? extends GrantedAuthority> grantedAuthorities;
-    private String password;
+    public String password;
     public String username;
 
     public AppUserDto(
@@ -55,6 +65,8 @@ public class AppUserDto implements UserDetails {
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.emailAddress = emailAddress;
+        this.failedLoginAttempts = 0;
+        this.lastSucceedLogin = null;
         this.active = true;
         this.version = 0;
         this.idAppUser = null;
@@ -74,6 +86,8 @@ public class AppUserDto implements UserDetails {
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
+                ", failedLoginAttempts='" + failedLoginAttempts + '\'' +
+                ", lastSucceedLogin='" + ((lastSucceedLogin != null) ? DateFormat.getDateTimeInstance().format(lastSucceedLogin) : "never") + '\'' +
                 ", active=" + active +
                 ", version=" + version +
                 '}';
